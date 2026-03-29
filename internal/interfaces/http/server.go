@@ -30,7 +30,7 @@ func NewServer(service Service, logger *slog.Logger) Server {
 
 func (s Server) Routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", s.handleHealth)
+	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("POST /v1/evaluations", s.handleEvaluate)
 	mux.HandleFunc("GET /v1/evaluations/", s.handleGetEvaluation)
 	mux.HandleFunc("GET /v1/rules/active", s.handleActiveRules)
