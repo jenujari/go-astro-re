@@ -6,16 +6,28 @@ import (
 	"net/http"
 
 	c "github.com/jenujari/go-astro-re/config"
+	rulesengine "github.com/jenujari/go-astro-re/rules-engine"
 	rtc "github.com/jenujari/runtime-context"
 )
 
 var (
-	server *http.Server
-	router *http.ServeMux
+	server      *http.Server
+	router      *http.ServeMux
+	ruleRuntime *rulesengine.Runtime
+)
+
+const (
+	ruleRootDir    = "rules"
+	ruleSetName    = "example"
+	ruleSetVersion = "0.0.1"
 )
 
 func init() {
-	// cfg := c.GetConfig()
+	runtime, err := rulesengine.NewRuntimeFromDir(ruleRootDir, ruleSetName, ruleSetVersion)
+	if err != nil {
+		panic(fmt.Errorf("init rule runtime: %w", err))
+	}
+	ruleRuntime = runtime
 
 	server = &http.Server{
 		Addr:              ":8899",

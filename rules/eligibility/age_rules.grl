@@ -1,0 +1,6 @@
+rule CheckAdult "Determine if customer is adult" salience 20 {
+	when
+		Customer.Age >= 18 && Customer.IsAdult == false
+	then
+		Customer.IsAdult = true;
+}

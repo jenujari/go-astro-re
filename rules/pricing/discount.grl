@@ -1,0 +1,6 @@
+rule SeniorDiscount "Discount for seniors" salience 10 {
+	when
+		Customer.Age >= 60 && Customer.Discount == 0.0
+	then
+		Customer.Discount = 0.2;
+}
