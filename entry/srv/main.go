@@ -8,18 +8,15 @@ import (
 	rtc "github.com/jenujari/runtime-context"
 )
 
-var pc *rtc.ProcessContext
-
-func init() {
-	rtc.InitProcessContext(c.GetLogger())
-	logger.SetLogger(c.GetLogger())
-}
-
 func main() {
-	pc = rtc.GetMainProcess()
+	appLogger := c.GetLogger()
+	rtc.InitProcessContext(appLogger)
+	logger.SetLogger(appLogger)
+
+	pc := rtc.GetMainProcess()
 	srv := server.GetServer()
 	pc.Run(server.RunServer)
-	c.GetLogger().Println("Server is running at ", srv.Addr)
+	appLogger.Println("Server is running at ", srv.Addr)
 
 	pc.WaitForFinish()
 }

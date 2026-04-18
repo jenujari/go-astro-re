@@ -6,9 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/engine"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/jenujari/go-astro-re/facts"
 	rulesengine "github.com/jenujari/go-astro-re/rules-engine"
 )
 
@@ -23,38 +22,25 @@ func writeRuleError(w http.ResponseWriter, err error) {
 }
 
 func ruleHandler(w http.ResponseWriter, r *http.Request) {
-	if ruleRuntime == nil {
+	if ruleService == nil {
 		writeRuleError(w, fmt.Errorf("rule runtime not initialized"))
 		return
 	}
 
-	kb, err := ruleRuntime.NewKnowledgeBaseInstance()
-	if err != nil {
-		writeRuleError(w, fmt.Errorf("new knowledge base: %w", err))
-		return
-	}
-
-	customer := &rulesengine.Customer{
+	customer := &facts.Customer{
 		Age: 65,
 	}
 
-	dataCtx := ast.NewDataContext()
-	err = dataCtx.Add("Customer", customer)
+	metrics, err := ruleService.EvaluateCustomer(rulesengine.EvaluateCustomerInput{
+		Customer: customer,
+		Phase:    facts.DefaultPhase,
+	})
 	if err != nil {
-		writeRuleError(w, fmt.Errorf("bind data context: %w", err))
+		writeRuleError(w, err)
 		return
 	}
 
-	gruleEngine := engine.NewGruleEngine()
-	gruleEngine.MaxCycle = 5
-
-	err = gruleEngine.Execute(dataCtx, kb)
-	if err != nil {
-		writeRuleError(w, fmt.Errorf("execute rules: %w", err))
-		return
-	}
-
-	fmt.Printf("Customer: %+v\n", customer)
+	fmt.Printf("Customer: %+v metrics=%+v\n", customer, metrics)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(customer)

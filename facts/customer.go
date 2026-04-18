@@ -1,4 +1,4 @@
-package rulesengine
+package facts
 
 // Customer is fact object used by GRL rules.
 type Customer struct {

@@ -13,7 +13,8 @@ import (
 var (
 	server      *http.Server
 	router      *http.ServeMux
-	ruleRuntime *rulesengine.Runtime
+	ruleManager *rulesengine.Manager
+	ruleService *rulesengine.Service
 )
 
 const (
@@ -23,11 +24,16 @@ const (
 )
 
 func init() {
-	runtime, err := rulesengine.NewRuntimeFromDir(ruleRootDir, ruleSetName, ruleSetVersion)
+	manager, err := rulesengine.NewManager(rulesengine.Config{
+		RuleRootDir:    ruleRootDir,
+		RuleSetName:    ruleSetName,
+		DefaultVersion: ruleSetVersion,
+	})
 	if err != nil {
 		panic(fmt.Errorf("init rule runtime: %w", err))
 	}
-	ruleRuntime = runtime
+	ruleManager = manager
+	ruleService = rulesengine.NewService(ruleManager, rulesengine.DefaultDataContextBuilder{}, ruleManager)
 
 	server = &http.Server{
 		Addr:              ":8899",
@@ -50,6 +56,9 @@ func init() {
 
 func RunServer() {
 	pc := rtc.GetMainProcess()
+	if err := ruleManager.StartWatcher(pc.CTX); err != nil {
+		c.GetLogger().Printf("rule watcher disabled: %v", err)
+	}
 
 	go func(cmdx *rtc.ProcessContext) {
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {

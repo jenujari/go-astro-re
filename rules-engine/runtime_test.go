@@ -1,6 +1,10 @@
 package rulesengine
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/jenujari/go-astro-re/facts"
+)
 
 const (
 	testRuleRootDir    = "../rules"
@@ -9,14 +13,19 @@ const (
 )
 
 func TestAdultRule(t *testing.T) {
-	runtime, err := NewRuntimeFromDir(testRuleRootDir, testRuleSetName, testRuleSetVersion)
+	mgr, err := NewManager(Config{
+		RuleRootDir:    testRuleRootDir,
+		RuleSetName:    testRuleSetName,
+		DefaultVersion: testRuleSetVersion,
+	})
 	if err != nil {
-		t.Fatalf("init runtime: %v", err)
+		t.Fatalf("init manager: %v", err)
 	}
 
-	customer := &Customer{Age: 20}
+	service := NewService(mgr, DefaultDataContextBuilder{}, mgr)
+	customer := &facts.Customer{Age: 20}
 
-	err = runtime.ExecuteCustomerRules(customer)
+	_, err = service.EvaluateCustomer(EvaluateCustomerInput{Customer: customer})
 	if err != nil {
 		t.Fatal(err)
 	}
