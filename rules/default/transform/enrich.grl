@@ -1,0 +1,15 @@
+rule TransformAdultFlag "Mark adults during transform phase" salience 50 {
+	when
+		Context.Phase == "TRANSFORM" && Customer.Age >= 18 && Customer.IsAdult == false
+	then
+		Customer.IsAdult = true;
+		Outcome.Message = "adult profile enriched";
+}
+
+rule TransformMinorFlag "Mark minors during transform phase" salience 40 {
+	when
+		Context.Phase == "TRANSFORM" && Customer.Age < 18 && Outcome.Message != "minor profile enriched"
+	then
+		Customer.IsAdult = false;
+		Outcome.Message = "minor profile enriched";
+}

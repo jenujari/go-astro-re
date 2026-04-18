@@ -1,0 +1,16 @@
+rule OutcomeApproveSenior "Approve senior discount in outcome phase" salience 30 {
+	when
+		Context.Phase == "OUTCOME" && Customer.IsAdult == true && Customer.Age >= 60 && Outcome.Status != "APPROVED"
+	then
+		Customer.Discount = 0.2;
+		Outcome.Status = "APPROVED";
+		Outcome.Eligible = true;
+}
+
+rule OutcomeRejectMinor "Reject minors in outcome phase" salience 20 {
+	when
+		Context.Phase == "OUTCOME" && Customer.IsAdult == false && Outcome.Status != "REJECTED"
+	then
+		Outcome.Status = "REJECTED";
+		Outcome.Eligible = false;
+}

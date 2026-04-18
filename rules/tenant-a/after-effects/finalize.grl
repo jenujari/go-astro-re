@@ -1,0 +1,7 @@
+rule TenantAAfterEffectsTaxRelief "Tenant A tax relief" salience 10 {
+	when
+		Context.Phase == "AFTER_EFFECTS" && Outcome.Status == "APPROVED" && Outcome.AfterEffectsApplied == false
+	then
+		Customer.TaxRate = 0.03;
+		Outcome.AfterEffectsApplied = true;
+}

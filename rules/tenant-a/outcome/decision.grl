@@ -1,0 +1,8 @@
+rule TenantAOutcomeApproveSenior "Tenant A higher senior discount" salience 30 {
+	when
+		Context.Phase == "OUTCOME" && Customer.IsAdult == true && Customer.Age >= 60 && Outcome.Status != "APPROVED"
+	then
+		Customer.Discount = 0.3;
+		Outcome.Status = "APPROVED";
+		Outcome.Eligible = true;
+}

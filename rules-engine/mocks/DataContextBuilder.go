@@ -4,6 +4,8 @@ package mocks
 
 import (
 	ast "github.com/hyperjumptech/grule-rule-engine/ast"
+	facts "github.com/jenujari/go-astro-re/facts"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -20,9 +22,9 @@ func (_m *DataContextBuilder) EXPECT() *DataContextBuilder_Expecter {
 	return &DataContextBuilder_Expecter{mock: &_m.Mock}
 }
 
-// BuildDataContext provides a mock function with given fields: customer, phase
-func (_m *DataContextBuilder) BuildDataContext(customer interface{}, phase string) (ast.IDataContext, error) {
-	ret := _m.Called(customer, phase)
+// BuildDataContext provides a mock function with given fields: customer, outcome, ruleCtx
+func (_m *DataContextBuilder) BuildDataContext(customer *facts.Customer, outcome *facts.ProcessOutcome, ruleCtx facts.RuleContext) (ast.IDataContext, error) {
+	ret := _m.Called(customer, outcome, ruleCtx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for BuildDataContext")
@@ -30,19 +32,19 @@ func (_m *DataContextBuilder) BuildDataContext(customer interface{}, phase strin
 
 	var r0 ast.IDataContext
 	var r1 error
-	if rf, ok := ret.Get(0).(func(interface{}, string) (ast.IDataContext, error)); ok {
-		return rf(customer, phase)
+	if rf, ok := ret.Get(0).(func(*facts.Customer, *facts.ProcessOutcome, facts.RuleContext) (ast.IDataContext, error)); ok {
+		return rf(customer, outcome, ruleCtx)
 	}
-	if rf, ok := ret.Get(0).(func(interface{}, string) ast.IDataContext); ok {
-		r0 = rf(customer, phase)
+	if rf, ok := ret.Get(0).(func(*facts.Customer, *facts.ProcessOutcome, facts.RuleContext) ast.IDataContext); ok {
+		r0 = rf(customer, outcome, ruleCtx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(ast.IDataContext)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(interface{}, string) error); ok {
-		r1 = rf(customer, phase)
+	if rf, ok := ret.Get(1).(func(*facts.Customer, *facts.ProcessOutcome, facts.RuleContext) error); ok {
+		r1 = rf(customer, outcome, ruleCtx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,15 +58,16 @@ type DataContextBuilder_BuildDataContext_Call struct {
 }
 
 // BuildDataContext is a helper method to define mock.On call
-//   - customer interface{}
-//   - phase string
-func (_e *DataContextBuilder_Expecter) BuildDataContext(customer interface{}, phase interface{}) *DataContextBuilder_BuildDataContext_Call {
-	return &DataContextBuilder_BuildDataContext_Call{Call: _e.mock.On("BuildDataContext", customer, phase)}
+//   - customer *facts.Customer
+//   - outcome *facts.ProcessOutcome
+//   - ruleCtx facts.RuleContext
+func (_e *DataContextBuilder_Expecter) BuildDataContext(customer interface{}, outcome interface{}, ruleCtx interface{}) *DataContextBuilder_BuildDataContext_Call {
+	return &DataContextBuilder_BuildDataContext_Call{Call: _e.mock.On("BuildDataContext", customer, outcome, ruleCtx)}
 }
 
-func (_c *DataContextBuilder_BuildDataContext_Call) Run(run func(customer interface{}, phase string)) *DataContextBuilder_BuildDataContext_Call {
+func (_c *DataContextBuilder_BuildDataContext_Call) Run(run func(customer *facts.Customer, outcome *facts.ProcessOutcome, ruleCtx facts.RuleContext)) *DataContextBuilder_BuildDataContext_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}), args[1].(string))
+		run(args[0].(*facts.Customer), args[1].(*facts.ProcessOutcome), args[2].(facts.RuleContext))
 	})
 	return _c
 }
@@ -74,7 +77,7 @@ func (_c *DataContextBuilder_BuildDataContext_Call) Return(_a0 ast.IDataContext,
 	return _c
 }
 
-func (_c *DataContextBuilder_BuildDataContext_Call) RunAndReturn(run func(interface{}, string) (ast.IDataContext, error)) *DataContextBuilder_BuildDataContext_Call {
+func (_c *DataContextBuilder_BuildDataContext_Call) RunAndReturn(run func(*facts.Customer, *facts.ProcessOutcome, facts.RuleContext) (ast.IDataContext, error)) *DataContextBuilder_BuildDataContext_Call {
 	_c.Call.Return(run)
 	return _c
 }

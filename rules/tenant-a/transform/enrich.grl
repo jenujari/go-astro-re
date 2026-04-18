@@ -1,0 +1,7 @@
+rule TenantATransformAdultFlag "Tenant A adult enrichment" salience 60 {
+	when
+		Context.Phase == "TRANSFORM" && Customer.Age >= 18 && Customer.IsAdult == false
+	then
+		Customer.IsAdult = true;
+		Outcome.Message = "tenant-a adult profile enriched";
+}

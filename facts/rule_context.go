@@ -1,10 +1,15 @@
 package facts
 
 const (
-	DefaultPhase = "PHASE1"
+	PhaseTransform    = "TRANSFORM"
+	PhaseOutcome      = "OUTCOME"
+	PhaseAfterEffects = "AFTER_EFFECTS"
+	DefaultPhase      = PhaseTransform
 )
 
 // RuleContext carries execution metadata consumed by phase-based rules.
 type RuleContext struct {
-	Phase string
+	Phase    string
+	TenantID string
+	Version  string
 }

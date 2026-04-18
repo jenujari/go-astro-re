@@ -1,0 +1,7 @@
+rule AfterEffectsTaxRelief "Apply tax relief after approved outcome" salience 10 {
+	when
+		Context.Phase == "AFTER_EFFECTS" && Outcome.Status == "APPROVED" && Outcome.AfterEffectsApplied == false
+	then
+		Customer.TaxRate = 0.05;
+		Outcome.AfterEffectsApplied = true;
+}

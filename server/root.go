@@ -33,7 +33,7 @@ func init() {
 		panic(fmt.Errorf("init rule runtime: %w", err))
 	}
 	ruleManager = manager
-	ruleService = rulesengine.NewService(ruleManager, rulesengine.DefaultDataContextBuilder{}, ruleManager)
+	ruleService = rulesengine.NewService(ruleManager, rulesengine.DefaultDataContextBuilder{}, ruleManager, ruleSetVersion)
 
 	server = &http.Server{
 		Addr:              ":8899",

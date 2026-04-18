@@ -61,23 +61,29 @@ func NewManager(cfg Config) (*Manager, error) {
 	return mgr, nil
 }
 
-func (m *Manager) Execute(dataCtx ast.IDataContext, kb *ast.KnowledgeBase) error {
+func (m *Manager) Execute(dataCtx ast.IDataContext, kb *ast.KnowledgeBase) (ExecutionTrace, error) {
 	if dataCtx == nil {
-		return fmt.Errorf("data context is nil")
+		return ExecutionTrace{}, fmt.Errorf("data context is nil")
 	}
 	if kb == nil {
-		return fmt.Errorf("knowledge base is nil")
+		return ExecutionTrace{}, fmt.Errorf("knowledge base is nil")
 	}
 
 	// Shared engine instance guarded for concurrent requests.
 	m.execMu.Lock()
 	defer m.execMu.Unlock()
 
+	traceListener := newRuleTraceListener()
+	m.ruleEngine.Listeners = []engine.GruleEngineListener{traceListener}
+	defer func() {
+		m.ruleEngine.Listeners = nil
+	}()
+
 	if err := m.ruleEngine.Execute(dataCtx, kb); err != nil {
-		return fmt.Errorf("execute rules: %w", err)
+		return traceListener.Trace(), fmt.Errorf("execute rules: %w", err)
 	}
 
-	return nil
+	return traceListener.Trace(), nil
 }
 
 func (m *Manager) KnowledgeBase(tenantID string, version string) (*ast.KnowledgeBase, error) {
