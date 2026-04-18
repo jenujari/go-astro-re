@@ -8,9 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/jenujari/go-astro-re/facts"
-	rulesengine "github.com/jenujari/go-astro-re/rules-engine"
 )
 
 type ruleRequest struct {
@@ -36,22 +37,36 @@ func ruleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := parseRuleRequest(r)
-	customer := &facts.Customer{Age: req.Age}
-
-	result, err := ruleService.EvaluateCustomerPhases(rulesengine.EvaluateCustomerInput{
+	requestEvent := cloudevents.NewEvent()
+	requestEvent.SetID(uuid.NewString())
+	requestEvent.SetSource("go-astro-re/http/rule")
+	requestEvent.SetType(facts.RuleEvaluationRequestedType)
+	requestEvent.SetDataSchema(facts.RuleEvaluationDataSchema)
+	err := requestEvent.SetData(cloudevents.ApplicationJSON, facts.RuleEvaluationRequest{
 		TenantID: req.TenantID,
 		Version:  req.Version,
-		Customer: customer,
+		Customer: facts.Customer{Age: req.Age},
 	})
 	if err != nil {
 		writeRuleError(w, err)
 		return
 	}
 
-	fmt.Printf("tenant=%s customer=%+v metrics=%+v\n", result.Metrics.TenantID, result.Customer, result.Metrics)
+	resultEvent, err := ruleService.EvaluateCustomerEvent(requestEvent)
+	if err != nil {
+		writeRuleError(w, err)
+		return
+	}
+
+	var outcome facts.RuleEvaluationOutcome
+	if err := resultEvent.DataAs(&outcome); err != nil {
+		writeRuleError(w, fmt.Errorf("decode cloud event outcome: %w", err))
+		return
+	}
+	fmt.Printf("tenant=%s customer=%+v metrics=%+v\n", outcome.TenantID, outcome.Customer, outcome.Metrics)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(resultEvent)
 }
 
 func parseRuleRequest(r *http.Request) ruleRequest {
